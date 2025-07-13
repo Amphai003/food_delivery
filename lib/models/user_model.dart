@@ -1,28 +1,31 @@
-import 'dart:convert';
-
 class User {
-  final String email;
   final String name;
-  // You can add more fields as needed, e.g., userId, token, etc.
+  final String email;
+  final String? tagline; // Added tagline
+  final String? profileImageUrl; // Added profileImageUrl
 
   User({
-    required this.email,
     required this.name,
+    required this.email,
+    this.tagline,
+    this.profileImageUrl,
   });
 
-  // Factory constructor to create a User from a JSON map
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      email: json['email'],
       name: json['name'],
+      email: json['email'],
+      tagline: json['tagline'],
+      profileImageUrl: json['profileImageUrl'],
     );
   }
 
-  // Method to convert a User object to a JSON map
   Map<String, dynamic> toJson() {
     return {
-      'email': email,
       'name': name,
+      'email': email,
+      'tagline': tagline,
+      'profileImageUrl': profileImageUrl,
     };
   }
 }

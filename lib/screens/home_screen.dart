@@ -4,13 +4,15 @@ import 'package:food_delivery/screens/all_restaurant_screen.dart';
 import 'package:food_delivery/screens/food_details_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:food_delivery/models/user_model.dart';
-import 'package:food_delivery/models/location_model.dart';
-import 'package:food_delivery/models/food_model.dart'; // Import the Food model
-import 'package:food_delivery/models/restaurant_model.dart'; // Import the new Restaurant model
+import 'package:food_delivery/models/location_model.dart'; // Existing Location model
+import 'package:food_delivery/models/food_model.dart';
+import 'package:food_delivery/models/restaurant_model.dart';
 
-import 'package:food_delivery/models/cart_item_model.dart'; // Import CartItem model
-import 'package:food_delivery/screens/cart_screen.dart'; // Import CartScreen
+import 'package:food_delivery/models/cart_item_model.dart';
+import 'package:food_delivery/screens/cart_screen.dart';
 import 'dart:convert';
+import 'package:food_delivery/widgets/app_drawer.dart';
+import 'package:food_delivery/screens/address_screen.dart'; // Import AddressScreen
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -21,77 +23,77 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   User? _currentUser;
-  Location? _currentLocation;
-  String _selectedCategory = 'All'; // State for selected category
+  Location? _currentLocation; // This will hold the selected delivery location
+  String _selectedCategory = 'All';
   final TextEditingController _searchController = TextEditingController();
-  int _cartItemCount = 0; // State for cart item count
+  int _cartItemCount = 0;
 
-  // Dummy Food Data
+  // Dummy Food Data (kept for context, as it's not directly modified)
   final List<Food> _allFoodItems = [
     Food(
       name: 'Classic Hot Dog',
       category: 'Hot Dog',
-      imageUrl: 'https://placehold.co/600x400/FFDDC1/000000?text=Hot+Dog',
-      price: 10000.00, // Example price in LAK
+      imageUrl: 'https://t4.ftcdn.net/jpg/05/04/79/85/360_F_504798531_rvLu6lD1wTeeF5SVvWJhIOyyKh4ib3nd.jpg',
+      price: 10000.00,
       description: 'A classic hot dog with mustard and ketchup.',
     ),
     Food(
       name: 'Spicy Hot Dog',
       category: 'Hot Dog',
-      imageUrl: 'https://placehold.co/600x400/FFC1C1/000000?text=Spicy+Hot+Dog',
-      price: 12000.00, // Example price in LAK
+      imageUrl: 'https://www.newsday.com/_next/image?url=https%3A%2F%2Fcdn.newsday.com%2Fimage-service%2Fversion%2Fc%3AZWQ1NzgyZjItNDdkZi00%3AZjItNDdkZi00ZmUyN2M4%2Ffddog210722.jpg%3Ff%3DLandscape%2B16%253A9%26w%3D770%26q%3D1&w=1920&q=80',
+      price: 12000.00,
       description: 'Hot dog with jalapeños and spicy sauce.',
     ),
     Food(
       name: 'Beef Burger',
       category: 'Burger',
-      imageUrl: 'https://placehold.co/600x400/C1FFDDC1/000000?text=Beef+Burger',
-      price: 35000.00, // Example price in LAK
+      imageUrl: 'https://plus.unsplash.com/premium_photo-1683619761468-b06992704398?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YnVyZ2VyfGVufDB8fDB8fHww',
+      price: 35000.00,
       description: 'Juicy beef patty with fresh vegetables.',
     ),
     Food(
       name: 'Chicken Burger',
       category: 'Burger',
-      imageUrl: 'https://placehold.co/600x400/C1FFC1/000000?text=Chicken+Burger',
-      price: 30000.00, // Example price in LAK
+      imageUrl: 'https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8YnVyZ2VyfGVufDB8fDB8fHww',
+      price: 30000.00,
       description: 'Grilled chicken breast burger.',
     ),
     Food(
       name: 'Pepperoni Pizza',
       category: 'Pizza',
-      imageUrl: 'https://placehold.co/600x400/FFC1FF/000000?text=Pepperoni+Pizza',
-      price: 50000.00, // Example price in LAK
+      imageUrl: 'https://t3.ftcdn.net/jpg/03/07/65/18/360_F_307651812_yiydVwvUeeZlTCuUs4E2aqsUMUlwIo86.jpg',
+      price: 45000.00,
       description: 'Classic pepperoni pizza with extra cheese.',
     ),
     Food(
       name: 'Veggie Pizza',
       category: 'Pizza',
-      imageUrl: 'https://placehold.co/600x400/C1FFC1/000000?text=Veggie+Pizza',
-      price: 45000.00, // Example price in LAK
+      imageUrl: 'https://img.freepik.com/free-psd/top-view-delicious-pizza_23-2151868964.jpg?semt=ais_hybrid&w=740',
+      price: 45000.00,
       description: 'Fresh vegetable pizza.',
     ),
     Food(
       name: 'Cola',
       category: 'Drinks',
-      imageUrl: 'https://placehold.co/600x400/C1C1FF/000000?text=Cola',
-      price: 8000.00, // Example price in LAK
+      imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTn9Sj69fOKYUAcPyL8vG7kNdGPoJrLsCxFUA&s',
+      price: 8000.00,
       description: 'Refreshing cola drink.',
     ),
     Food(
       name: 'Orange Juice',
       category: 'Drinks',
-      imageUrl: 'https://placehold.co/600x400/FFDDC1/000000?text=Orange+Juice',
-      price: 15000.00, // Example price in LAK
+      imageUrl: 'https://www.craftginclub.co.uk/_next/image?url=https%3A%2F%2Fimages.prismic.io%2Fcgc-web%2FM2IxMTA3ZjgtZmE5Zi00ZTgxLTlhM2QtZWYwODNhMDE5ZTFm_veg-juice-cocktails.jpg%3Fauto%3Dcompress%2Cformat%26rect%3D0%2C0%2C1200%2C600%26w%3D1200%26h%3D600&w=2058&q=75',
+      price: 15000.00,
       description: 'Freshly squeezed orange juice.',
     ),
   ];
 
-  // Dummy Restaurant Data
+  // Dummy Restaurant Data (kept for context, as it's not directly modified)
   final List<Restaurant> _allRestaurants = [
     Restaurant(
       name: 'Rose Garden Restaurant',
       categories: 'Burger - Chicken - Riche - Wings',
-      imageUrl: 'https://placehold.co/600x400/E0E0E0/FFFFFF?text=Rose+Garden',
+      imageUrl: 'https://images.unsplash.com/photo-1613946069412-38f7f1ff0b65?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Njh8fHJlc3RhdXJhbnR8ZW58MHx8MHx8fDA%3D',
       rating: 4.7,
       deliveryFee: 'Free',
       deliveryTime: '20 min',
@@ -99,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Restaurant(
       name: 'The Green Bowl',
       categories: 'Healthy - Salads - Vegan',
-      imageUrl: 'https://placehold.co/600x400/D0D0D0/FFFFFF?text=Green+Bowl',
+      imageUrl: 'https://images.unsplash.com/photo-1498654896293-37aacf113fd9?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDl8fHJlc3RhdXJhbnR8ZW58MHx8MHx8fDA%3D',
       rating: 4.5,
       deliveryFee: 'LAK 10,000',
       deliveryTime: '30 min',
@@ -107,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Restaurant(
       name: 'Burger Bistro',
       categories: 'Burgers',
-      imageUrl: 'https://placehold.co/600x400/FFC0CB/000000?text=Burger+Bistro',
+      imageUrl: 'https://images.unsplash.com/photo-1579027989536-b7b1f875659b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzV8fHJlc3RhdXJhbnR8ZW58MHx8MHx8fDA%3D',
       rating: 4.2,
       deliveryFee: 'LAK 5,000',
       deliveryTime: '25 min',
@@ -115,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Restaurant(
       name: 'Smokin\' Burger',
       categories: 'Burgers - BBQ',
-      imageUrl: 'https://placehold.co/600x400/ADD8E6/000000?text=Smokin+Burger',
+      imageUrl: 'https://images.unsplash.com/photo-1502998070258-dc1338445ac2?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjd8fHJlc3RhdXJhbnR8ZW58MHx8MHx8fDA%3D',
       rating: 4.8,
       deliveryFee: 'Free',
       deliveryTime: '15 min',
@@ -123,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Restaurant(
       name: 'Kabab Restaurant',
       categories: 'Kabab - Middle Eastern',
-      imageUrl: 'https://placehold.co/600x400/90EE90/000000?text=Kabab+Restaurant',
+      imageUrl: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       rating: 4.0,
       deliveryFee: 'LAK 8,000',
       deliveryTime: '35 min',
@@ -133,13 +135,11 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Food> get _filteredFoodItems {
     List<Food> itemsToFilter = _allFoodItems;
 
-    // Apply category filter first if no search query is active
     if (_searchController.text.isEmpty && _selectedCategory != 'All') {
       itemsToFilter =
           itemsToFilter.where((food) => food.category == _selectedCategory).toList();
     }
 
-    // Apply search filter if query is not empty
     if (_searchController.text.isNotEmpty) {
       final query = _searchController.text.toLowerCase();
       itemsToFilter = itemsToFilter
@@ -170,8 +170,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadUserData();
-    _loadCartItemCount(); // Load cart count on init
-    _searchController.addListener(_onSearchChanged); // Listen for search input changes
+    _loadCartItemCount();
+    _loadCurrentLocation(); // Load the selected location
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
@@ -183,15 +184,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
-    final userJson = prefs.getString('registeredUser'); // Use 'registeredUser' key
-    final locationJson = prefs.getString('userLocation');
-
+    final userJson = prefs.getString('registeredUser');
     setState(() {
       if (userJson != null) {
         _currentUser = User.fromJson(jsonDecode(userJson));
       }
+    });
+  }
+
+  Future<void> _loadCurrentLocation() async {
+    final prefs = await SharedPreferences.getInstance();
+    final locationJson = prefs.getString('userLocation');
+    setState(() {
       if (locationJson != null) {
         _currentLocation = Location.fromJson(jsonDecode(locationJson));
+      } else {
+        _currentLocation = null; // No location selected
       }
     });
   }
@@ -216,13 +224,13 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onCategorySelected(String category) {
     setState(() {
       _selectedCategory = category;
-      _searchController.clear(); // Clear search when category changes
+      _searchController.clear();
     });
   }
 
   void _onSearchChanged() {
     setState(() {
-      // Rebuilds the widget, which re-evaluates _filteredFoodItems and _filteredRestaurantItems
+      // Rebuilds the widget
     });
   }
 
@@ -236,35 +244,47 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.black),
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Menu tapped!')),
+        leading: Builder(
+          builder: (BuildContext context) {
+            return IconButton(
+              icon: const Icon(Icons.menu, color: Colors.black),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
             );
           },
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'DELIVER TO',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-            Row(
-              children: [
-                Text(
-                  _currentLocation?.address ?? 'Select Location',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+        title: GestureDetector(
+          onTap: () async {
+            // Navigate to AddressScreen and await result (if any selection is made)
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AddressScreen()),
+            );
+            _loadCurrentLocation(); // Reload the selected location after returning
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'DELIVER TO',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              Row(
+                children: [
+                  Text(
+                    _currentLocation?.address ?? 'Select Location',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-                const Icon(Icons.keyboard_arrow_down, color: Colors.orange),
-              ],
-            ),
-          ],
+                  const Icon(Icons.keyboard_arrow_down, color: Colors.orange),
+                ],
+              ),
+            ],
+          ),
         ),
         actions: [
           Stack(
@@ -272,11 +292,10 @@ class _HomeScreenState extends State<HomeScreen> {
               IconButton(
                 icon: const Icon(Icons.shopping_bag_outlined, color: Colors.black),
                 onPressed: () {
-                  // Navigate to Cart Screen
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const CartScreen()),
-                  ).then((_) => _loadCartItemCount()); // Reload cart count when returning
+                  ).then((_) => _loadCartItemCount());
                 },
               ),
               if (_cartItemCount > 0)
@@ -308,6 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(width: 8),
         ],
       ),
+      drawer: const AppDrawer(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -322,14 +342,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            // Search Bar
             Container(
               decoration: BoxDecoration(
                 color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextField(
-                controller: _searchController, // Assign controller
+                controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'Search dishes, restaurants',
                   hintStyle: TextStyle(color: Colors.grey[400]),
@@ -337,12 +356,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                onChanged: (value) => _onSearchChanged(), // Trigger search on change
+                onChanged: (value) => _onSearchChanged(),
               ),
             ),
             const SizedBox(height: 24),
-
-            // Conditionally display categories or search results
             if (!isSearching) ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -362,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         MaterialPageRoute(
                           builder: (context) => AllFoodItemsScreen(allFoodItems: _allFoodItems),
                         ),
-                      ).then((_) => _loadCartItemCount()); // Reload cart count when returning
+                      ).then((_) => _loadCartItemCount());
                     },
                     child: Row(
                       children: const [
@@ -382,7 +399,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 16),
               SizedBox(
-                height: 40, // Height of the category chips
+                height: 40,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
@@ -401,8 +418,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 24),
             ],
-
-            // Display Food Search Results or Categorized Dishes
             if (currentFoodItems.isNotEmpty) ...[
               Text(
                 isSearching ? 'Dishes Matching "${_searchController.text}"' : 'Dishes',
@@ -422,16 +437,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         MaterialPageRoute(
                           builder: (context) => FoodDetailScreen(food: food),
                         ),
-                      ).then((_) => _loadCartItemCount()); // Reload cart count when returning
+                      ).then((_) => _loadCartItemCount());
                     },
                     child: _buildFoodItemCard(food),
                   );
                 }).toList(),
               ),
-              const SizedBox(height: 24), // Space before next section
+              const SizedBox(height: 24),
             ],
-
-            // Display Restaurant Search Results or All Restaurants
             if (currentRestaurantItems.isNotEmpty) ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -483,8 +496,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 }).toList(),
               ),
             ],
-
-            // Message if no results found for either
             if (isSearching && currentFoodItems.isEmpty && currentRestaurantItems.isEmpty)
               const Center(child: Text('No results found for your search query.')),
             if (!isSearching && currentFoodItems.isEmpty && currentRestaurantItems.isEmpty)
@@ -525,7 +536,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildRestaurantCard(
       String name, String categories, String imageUrl, String rating, String deliveryFee, String deliveryTime) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16), // Add margin for spacing
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -625,7 +636,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ClipRRect(
             borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
             child: Hero(
-              tag: 'foodImage-${food.name}', // Unique tag for hero animation
+              tag: 'foodImage-${food.name}',
               child: Image.network(
                 food.imageUrl,
                 height: 100,
@@ -670,7 +681,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'LAK ${food.price.toStringAsFixed(2)}', // Display price in LAK
+                    'LAK ${food.price.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

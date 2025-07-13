@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'login_screen.dart';
-import '../widgets/food_logo.dart';
-import '../widgets/rays_painter.dart';
+import 'package:food_delivery/screens/login_screen.dart'; // Make sure this path is correct
+import '../widgets/food_logo.dart'; // Make sure this path is correct
+import '../widgets/rays_painter.dart'; // Make sure this path is correct
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -15,15 +15,18 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
 
+  // Keep a reference to the timer so you can cancel it
+  Timer? _timer;
+
   @override
   void initState() {
     super.initState();
-    
+
     _animationController = AnimationController(
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2), // Use const for Duration
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -31,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen>
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _scaleAnimation = Tween<double>(
       begin: 0.5,
       end: 1.0,
@@ -39,24 +42,29 @@ class _SplashScreenState extends State<SplashScreen>
       parent: _animationController,
       curve: Curves.elasticOut,
     ));
-    
+
     _animationController.forward();
-    
-    // Navigate to login screen after 3 seconds
-    Timer(Duration(seconds: 3), () {
+
+    // Start the timer and store its reference
+    _timer = Timer(const Duration(seconds: 3), () {
       _navigateToLogin();
     });
   }
 
   void _navigateToLogin() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => LoginScreen()),
-    );
+    // Crucial check: only navigate if the widget is still mounted
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()), // Add const
+      );
+    }
   }
 
   @override
   void dispose() {
+    // Cancel the timer to prevent it from trying to navigate after dispose
+    _timer?.cancel();
     _animationController.dispose();
     super.dispose();
   }
@@ -67,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen>
       backgroundColor: Colors.white,
       body: GestureDetector(
         onTap: _navigateToLogin,
-        child: Container(
+        child: SizedBox( // Changed from Container to SizedBox as it's primarily for sizing
           width: double.infinity,
           height: double.infinity,
           child: Stack(
@@ -82,14 +90,14 @@ class _SplashScreenState extends State<SplashScreen>
                     return Transform.rotate(
                       angle: _animationController.value * 0.5,
                       child: CustomPaint(
-                        size: Size(200, 200),
+                        size: const Size(200, 200), // Add const
                         painter: RaysPainter(),
                       ),
                     );
                   },
                 ),
               ),
-              
+
               // Main content
               Center(
                 child: AnimatedBuilder(
@@ -103,8 +111,8 @@ class _SplashScreenState extends State<SplashScreen>
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             // Food logo
-                            FoodLogo(fontSize: 48),
-                            SizedBox(height: 20),
+                            const FoodLogo(fontSize: 48), // Add const
+                            const SizedBox(height: 20), // Add const
                             Text(
                               'Delicious Food Awaits',
                               style: TextStyle(
@@ -113,9 +121,9 @@ class _SplashScreenState extends State<SplashScreen>
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
-                            SizedBox(height: 40),
+                            const SizedBox(height: 40), // Add const
                             // Loading indicator
-                            SizedBox(
+                            const SizedBox( // Add const
                               width: 30,
                               height: 30,
                               child: CircularProgressIndicator(
@@ -132,7 +140,7 @@ class _SplashScreenState extends State<SplashScreen>
                   },
                 ),
               ),
-              
+
               // Tap to continue hint
               Positioned(
                 bottom: 50,

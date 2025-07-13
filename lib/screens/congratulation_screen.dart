@@ -11,6 +11,7 @@ class CongratulationsScreen extends StatelessWidget {
   Future<void> _trackOrder(BuildContext context) async {
     // In a real app, you would fetch the actual order ID and details from a backend.
     // Here, we'll just navigate to the TrackOrderScreen.
+    // We use pushReplacement to remove CongratulationsScreen from the navigation stack.
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const TrackOrderScreen()),

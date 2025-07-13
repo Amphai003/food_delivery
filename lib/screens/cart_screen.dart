@@ -84,14 +84,16 @@ class _CartScreenState extends State<CartScreen> {
     });
     await _saveCartItems();
     _calculateTotalPrice();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Item removed from cart.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Item removed from cart.')));
   }
 
   Future<void> _saveCartItems() async {
     final prefs = await SharedPreferences.getInstance();
-    List<String> updatedCartJsonList = _cartItems.map((item) => jsonEncode(item.toJson())).toList();
+    List<String> updatedCartJsonList = _cartItems
+        .map((item) => jsonEncode(item.toJson()))
+        .toList();
     await prefs.setStringList('cartItems', updatedCartJsonList);
   }
 
@@ -110,10 +112,7 @@ class _CartScreenState extends State<CartScreen> {
         ),
         title: const Text(
           'Cart',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
@@ -124,7 +123,10 @@ class _CartScreenState extends State<CartScreen> {
             },
             child: const Text(
               'DONE',
-              style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.orange,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -161,7 +163,10 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.grey[50],
                       borderRadius: BorderRadius.circular(12),
@@ -185,7 +190,9 @@ class _CartScreenState extends State<CartScreen> {
                         GestureDetector(
                           onTap: () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Edit Address tapped!')),
+                              const SnackBar(
+                                content: Text('Edit Address tapped!'),
+                              ),
                             );
                             // TODO: Navigate to address editing screen
                           },
@@ -253,15 +260,22 @@ class _CartScreenState extends State<CartScreen> {
                     onPressed: () {
                       if (_cartItems.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Your cart is empty. Add items to place an order.')),
+                          const SnackBar(
+                            content: Text(
+                              'Your cart is empty. Add items to place an order.',
+                            ),
+                          ),
                         );
                       } else {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PaymentScreen(totalAmount: _totalPrice),
+                            builder: (context) =>
+                                PaymentScreen(totalAmount: _totalPrice),
                           ),
-                        ).then((_) => _loadCartAndLocation()); // Reload cart if returning from payment
+                        ).then(
+                          (_) => _loadCartAndLocation(),
+                        ); // Reload cart if returning from payment
                       }
                     },
                   ),
@@ -351,8 +365,13 @@ class _CartScreenState extends State<CartScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.remove, color: Colors.orange, size: 20),
-                      onPressed: () => _updateCartItemQuantity(index, item.quantity - 1),
+                      icon: const Icon(
+                        Icons.remove,
+                        color: Colors.orange,
+                        size: 20,
+                      ),
+                      onPressed: () =>
+                          _updateCartItemQuantity(index, item.quantity - 1),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
@@ -368,8 +387,13 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.add, color: Colors.orange, size: 20),
-                      onPressed: () => _updateCartItemQuantity(index, item.quantity + 1),
+                      icon: const Icon(
+                        Icons.add,
+                        color: Colors.orange,
+                        size: 20,
+                      ),
+                      onPressed: () =>
+                          _updateCartItemQuantity(index, item.quantity + 1),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
