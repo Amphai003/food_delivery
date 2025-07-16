@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:food_delivery/screens/home_screen.dart';
-import 'package:food_delivery/screens/track_order_screen.dart'; // Import TrackOrderScreen
+import 'package:food_delivery/screens/track_order_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:food_delivery/models/cart_item_model.dart'; // Ensure this is the updated CartItem model
+import 'package:food_delivery/models/cart_item_model.dart';
 
 class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({Key? key}) : super(key: key);
@@ -15,23 +15,19 @@ class MyOrdersScreen extends StatefulWidget {
 class _MyOrdersScreenState extends State<MyOrdersScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<CartItem> _ongoingOrders = []; // For items in ongoing orders
-  List<CartItem> _historyOrders =
-      []; // For items in history orders (completed/cancelled)
+  List<CartItem> _ongoingOrders = [];
+  List<CartItem> _historyOrders = [];
 
   @override
   void initState() {
     super.initState();
-    debugPrint('MyOrdersScreen: initState called'); // Debugging print
     _tabController = TabController(length: 2, vsync: this);
     _loadOrders();
-    // Listen for tab changes if you need to refresh data when tabs are switched
     _tabController.addListener(_handleTabSelection);
   }
 
   @override
   void dispose() {
-    debugPrint('MyOrdersScreen: dispose called'); // Debugging print
     _tabController.removeListener(_handleTabSelection);
     _tabController.dispose();
     super.dispose();
@@ -39,19 +35,13 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
   void _handleTabSelection() {
     if (_tabController.indexIsChanging) {
-      debugPrint(
-        'MyOrdersScreen: Tab selection changing, reloading orders.',
-      ); // Debugging print
-      // Reload orders when switching tabs to ensure the latest state is shown
       _loadOrders();
     }
   }
 
   Future<void> _loadOrders() async {
-    debugPrint('MyOrdersScreen: _loadOrders called'); // Debugging print
     final prefs = await SharedPreferences.getInstance();
 
-    // Load ongoing orders
     List<String> lastOrderJsonList =
         prefs.getStringList('lastOrderItems') ?? [];
     List<CartItem> loadedOngoingOrders = [];
@@ -59,65 +49,39 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
       try {
         loadedOngoingOrders.add(CartItem.fromJson(jsonDecode(jsonString)));
       } catch (e) {
-        debugPrint(
-          'MyOrdersScreen: Error decoding ongoing order item: $e',
-        ); // Use debugPrint
+        // Handle decoding errors gracefully
       }
     }
 
-    // Load history orders
     List<String> historyJsonList = prefs.getStringList('orderHistory') ?? [];
     List<CartItem> loadedHistoryOrders = [];
     for (var jsonString in historyJsonList) {
       try {
         loadedHistoryOrders.add(CartItem.fromJson(jsonDecode(jsonString)));
       } catch (e) {
-        debugPrint(
-          'MyOrdersScreen: Error decoding history order item: $e',
-        ); // Use debugPrint
+        // Handle decoding errors gracefully
       }
     }
 
     if (mounted) {
-      // Ensure widget is still in the tree before calling setState
       setState(() {
         _ongoingOrders = loadedOngoingOrders;
         _historyOrders = loadedHistoryOrders;
       });
-      debugPrint(
-        'MyOrdersScreen: Orders loaded and setState called. Ongoing: ${_ongoingOrders.length}, History: ${_historyOrders.length}',
-      ); // Debugging print
-    } else {
-      debugPrint(
-        'MyOrdersScreen: _loadOrders finished, but widget is not mounted.',
-      ); // Debugging print
     }
   }
 
   Future<void> _saveOrders() async {
-    debugPrint('MyOrdersScreen: _saveOrders called'); // Debugging print
     final prefs = await SharedPreferences.getInstance();
-    List<String> ongoingJsonList = _ongoingOrders
-        .map((item) => jsonEncode(item.toJson()))
-        .toList();
-    List<String> historyJsonList = _historyOrders
-        .map((item) => jsonEncode(item.toJson()))
-        .toList();
-    await prefs.setStringList(
-      'lastOrderItems',
-      ongoingJsonList,
-    ); // Save ongoing orders
-    await prefs.setStringList(
-      'orderHistory',
-      historyJsonList,
-    ); // Save history orders
-    debugPrint('MyOrdersScreen: Orders saved.'); // Debugging print
+    List<String> ongoingJsonList =
+        _ongoingOrders.map((item) => jsonEncode(item.toJson())).toList();
+    List<String> historyJsonList =
+        _historyOrders.map((item) => jsonEncode(item.toJson())).toList();
+    await prefs.setStringList('lastOrderItems', ongoingJsonList);
+    await prefs.setStringList('orderHistory', historyJsonList);
   }
 
   Future<void> _cancelOrder(int index) async {
-    debugPrint(
-      'MyOrdersScreen: _cancelOrder called for index $index',
-    ); // Debugging print
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -133,9 +97,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
               child: const Text('No'),
             ),
             TextButton(
-              onPressed: () => Navigator.of(
-                context,
-              ).pop(true), // User confirmed cancellation
+              onPressed: () => Navigator.of(context).pop(true),
               child: const Text('Yes', style: TextStyle(color: Colors.red)),
             ),
           ],
@@ -144,18 +106,12 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
     );
 
     if (confirmed == true && mounted) {
-      // Check mounted after async operation
       setState(() {
         CartItem cancelledItem = _ongoingOrders.removeAt(index);
-        // Add the cancelled item to history with a 'Cancelled' status
         _historyOrders.add(cancelledItem.copyWith(status: 'Cancelled'));
-        debugPrint(
-          'MyOrdersScreen: Order at index $index cancelled and moved to history.',
-        ); // Debugging print
       });
-      await _saveOrders(); // Persist changes
+      await _saveOrders();
       if (mounted) {
-        // Check mounted again before showing SnackBar
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Order cancelled successfully.')),
         );
@@ -164,7 +120,6 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
   }
 
   Future<void> _deleteAllHistory() async {
-    debugPrint('MyOrdersScreen: _deleteAllHistory called'); // Debugging print
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -189,14 +144,10 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
     if (confirmed == true && mounted) {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList(
-        'orderHistory',
-        [],
-      ); // Clear history in SharedPreferences
+      await prefs.setStringList('orderHistory', []);
       setState(() {
-        _historyOrders.clear(); // Clear local list
+        _historyOrders.clear();
       });
-      debugPrint('MyOrdersScreen: All history items deleted.');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Order history cleared successfully.')),
@@ -205,9 +156,75 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
     }
   }
 
+  // New: Function to handle rating an order
+  Future<void> _rateOrder(CartItem item) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Rate "${item.name ?? 'Item'}"'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('How would you rate this order?'),
+              const SizedBox(height: 10),
+              // You can add a more sophisticated rating widget here (e.g., star rating)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (index) {
+                  return const Icon(Icons.star_border, color: Colors.amber);
+                }),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Later'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Thank you for rating "${item.name ?? 'Item'}"!')),
+                );
+                // In a real app, send rating to backend
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+              child: const Text('Submit', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // New: Function to handle re-ordering an item
+  Future<void> _reOrder(CartItem item) async {
+    // For demonstration, we'll add it back to ongoing orders.
+    // In a real app, you might add it to the cart and then navigate to the cart/checkout.
+    if (mounted) {
+      setState(() {
+        // Create a new CartItem instance with a fresh status for re-order
+        _ongoingOrders.add(item.copyWith(status: 'Re-ordered', quantity: item.quantity ?? 1));
+      });
+      await _saveOrders();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('"${item.name ?? 'Item'}" re-ordered!')),
+        );
+        // Optionally navigate to HomeScreen or CartScreen after re-ordering
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+              (Route<dynamic> route) => false, // Clears the stack and goes to HomeScreen
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    debugPrint('MyOrdersScreen: build called'); // Debugging print
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -216,7 +233,6 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           onPressed: () {
-            // Navigate to AddCardScreen
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -229,23 +245,13 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
         ),
         centerTitle: true,
         actions: [
-          // Add a "Delete All History" button here if the History tab is active
-          // For simplicity, I'll place it in the TabBarView for the History tab
-          // You could also use a Listener on _tabController and show/hide it in AppBar actions
-          if (_tabController.index == 1) // Only show if History tab is selected
+          if (_tabController.index == 1 && _historyOrders.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete_forever, color: Colors.red),
               tooltip: 'Clear All History',
               onPressed: _deleteAllHistory,
             ),
-          IconButton(
-            icon: const Icon(Icons.more_horiz, color: Colors.black),
-            onPressed: () {
-              debugPrint('MyOrdersScreen: More options button pressed.');
-              // TODO: Implement more options for orders if needed
-            },
-          ),
-          const SizedBox(width: 8),
+          // Removed the Icons.more_horiz button
         ],
         bottom: TabBar(
           controller: _tabController,
@@ -268,27 +274,19 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
   Widget _buildOngoingOrdersTab() {
     if (_ongoingOrders.isEmpty) {
-      debugPrint(
-        'MyOrdersScreen: Building Ongoing tab - No ongoing orders.',
-      ); // Debugging print
       return const Center(child: Text('You have no ongoing orders.'));
     }
-    debugPrint(
-      'MyOrdersScreen: Building Ongoing tab - Showing ${_ongoingOrders.length} orders.',
-    ); // Debugging print
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
       itemCount: _ongoingOrders.length,
       itemBuilder: (context, index) {
         final item = _ongoingOrders[index];
-        // For ongoing orders, provide track and cancel options
         return _buildOrderItemCard(
           item,
-          item.status ??
-              'Ongoing', // Use item.status if available, default to 'Ongoing'
+          item.status ?? 'Ongoing',
           trackOrder: true,
           cancelOrder: true,
-          onCancel: () => _cancelOrder(index), // Pass the cancel function
+          onCancel: () => _cancelOrder(index),
         );
       },
     );
@@ -296,9 +294,6 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
   Widget _buildHistoryOrdersTab() {
     if (_historyOrders.isEmpty) {
-      debugPrint(
-        'MyOrdersScreen: Building History tab - No order history.',
-      ); // Debugging print
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(16.0),
@@ -306,26 +301,23 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text('You have no order history.'),
-              // You can optionally add a "clear" button here as well, but it's now in the AppBar
             ],
           ),
         ),
       );
     }
-    debugPrint(
-      'MyOrdersScreen: Building History tab - Showing ${_historyOrders.length} orders.',
-    ); // Debugging print
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
       itemCount: _historyOrders.length,
       itemBuilder: (context, index) {
         final item = _historyOrders[index];
-        // For history, status can be "Completed" or "Cancelled"
         return _buildOrderItemCard(
           item,
-          item.status ?? 'Completed', // Use item.status, default to 'Completed'
+          item.status ?? 'Completed',
           rateOrder: true,
           reOrder: true,
+          onRate: () => _rateOrder(item), // Pass the rate function
+          onReOrder: () => _reOrder(item), // Pass the re-order function
         );
       },
     );
@@ -338,14 +330,14 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
     bool cancelOrder = false,
     bool rateOrder = false,
     bool reOrder = false,
-    VoidCallback? onCancel, // New callback for cancel button
+    VoidCallback? onCancel,
+    VoidCallback? onRate, // New callback for rate button
+    VoidCallback? onReOrder, // New callback for re-order button
   }) {
-    // Adding more robust null checks/defaults for display
     final String itemName = item.name ?? 'Unknown Item';
     final double itemTotalPrice = (item.price ?? 0.0) * (item.quantity ?? 0);
     final int itemQuantity = item.quantity ?? 0;
-    final String imageUrl =
-        item.imageUrl ?? ''; // Provide a default empty string for image URL
+    final String imageUrl = item.imageUrl ?? '';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -370,14 +362,11 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  imageUrl, // Use the null-checked imageUrl
+                  imageUrl,
                   height: 60,
                   width: 60,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    debugPrint(
-                      'MyOrdersScreen: Image loading error for $itemName: $error',
-                    ); // Debugging print
                     return Container(
                       height: 60,
                       width: 60,
@@ -395,7 +384,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      itemName, // Use null-checked itemName
+                      itemName,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -404,7 +393,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'LAK ${itemTotalPrice.toStringAsFixed(2)}', // Use calculated total price
+                      'LAK ${itemTotalPrice.toStringAsFixed(2)}',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -412,7 +401,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                       ),
                     ),
                     Text(
-                      '$itemQuantity Items', // Use null-checked quantity
+                      '$itemQuantity Items',
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                   ],
@@ -422,7 +411,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '#${(100000 + (item.hashCode % 900000)).toString()}', // Simple pseudo-order ID
+                    '#${(100000 + (item.hashCode % 900000)).toString()}',
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 4),
@@ -434,8 +423,8 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                       color: status == 'Completed'
                           ? Colors.green
                           : (status == 'Cancelled'
-                                ? Colors.red
-                                : Colors.orange),
+                              ? Colors.red
+                              : Colors.orange),
                     ),
                   ),
                 ],
@@ -449,15 +438,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
               if (rateOrder)
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {
-                      debugPrint(
-                        'MyOrdersScreen: Rate button tapped for $itemName',
-                      ); // Debugging print
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Rate "$itemName" tapped!')),
-                      );
-                      // TODO: Implement rate order functionality
-                    },
+                    onPressed: onRate, // Use the new onRate callback
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.orange,
                       side: const BorderSide(color: Colors.orange),
@@ -473,15 +454,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
               if (reOrder)
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      debugPrint(
-                        'MyOrdersScreen: Re-Order button tapped for $itemName',
-                      ); // Debugging print
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Re-Order "$itemName" tapped!')),
-                      );
-                      // TODO: Implement re-order functionality (e.g., add to cart)
-                    },
+                    onPressed: onReOrder, // Use the new onReOrder callback
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       shape: RoundedRectangleBorder(
@@ -499,21 +472,13 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      debugPrint(
-                        'MyOrdersScreen: Track Order button tapped for $itemName. Navigating to TrackOrderScreen.',
-                      ); // Debugging print
-                      // IMPORTANT: Use Navigator.push here to keep MyOrdersScreen on stack
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const TrackOrderScreen(),
                         ),
                       ).then((_) {
-                        debugPrint(
-                          'MyOrdersScreen: Returned from TrackOrderScreen. Reloading orders.',
-                        ); // Debugging print
-                        // This callback runs when TrackOrderScreen is popped
-                        _loadOrders(); // Reload orders to reflect potential completion/cancellation
+                        _loadOrders();
                       });
                     },
                     style: ElevatedButton.styleFrom(
@@ -533,7 +498,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
               if (cancelOrder)
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: onCancel, // Use the provided callback for cancel
+                    onPressed: onCancel,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
                       side: const BorderSide(color: Colors.red),

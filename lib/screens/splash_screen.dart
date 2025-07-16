@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:food_delivery/screens/login_screen.dart'; // Make sure this path is correct
-import '../widgets/food_logo.dart'; // Make sure this path is correct
-import '../widgets/rays_painter.dart'; // Make sure this path is correct
+import 'package:food_delivery/screens/login_screen.dart'; 
+import '../widgets/food_logo.dart'; 
+import '../widgets/rays_painter.dart'; 
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -111,8 +111,8 @@ class _SplashScreenState extends State<SplashScreen>
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             // Food logo
-                            const FoodLogo(fontSize: 48), // Add const
-                            const SizedBox(height: 20), // Add const
+                            const FoodLogo(fontSize: 48), 
+                            const SizedBox(height: 20), 
                             Text(
                               'Delicious Food Awaits',
                               style: TextStyle(

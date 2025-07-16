@@ -149,18 +149,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 24),
 
             // Settings Section
-            _buildSectionCard([
-              _buildProfileListItem(
-                icon: Icons.settings_outlined,
-                title: 'Settings',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Settings tapped!')),
-                  );
-                  // TODO: Navigate to Settings screen
-                },
-              ),
-            ]),
+            // _buildSectionCard([
+            //   _buildProfileListItem(
+            //     icon: Icons.settings_outlined,
+            //     title: 'Settings',
+            //     onTap: () {
+            //       ScaffoldMessenger.of(context).showSnackBar(
+            //         const SnackBar(content: Text('Settings tapped!')),
+            //       );
+            //       // TODO: Navigate to Settings screen
+            //     },
+            //   ),
+            // ]),
           ],
         ),
       ),

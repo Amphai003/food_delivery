@@ -187,24 +187,24 @@ class _CartScreenState extends State<CartScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Edit Address tapped!'),
-                              ),
-                            );
-                            // TODO: Navigate to address editing screen
-                          },
-                          child: const Text(
-                            'EDIT',
-                            style: TextStyle(
-                              color: Colors.orange,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
+                        // GestureDetector(
+                        //   onTap: () {
+                        //     ScaffoldMessenger.of(context).showSnackBar(
+                        //       const SnackBar(
+                        //         content: Text('Edit Address tapped!'),
+                        //       ),
+                        //     );
+                        //     // TODO: Navigate to address editing screen
+                        //   },
+                        //   child: const Text(
+                        //     'EDIT',
+                        //     style: TextStyle(
+                        //       color: Colors.orange,
+                        //       fontSize: 14,
+                        //       fontWeight: FontWeight.w600,
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),
@@ -232,26 +232,26 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: GestureDetector(
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Breakdown tapped!')),
-                        );
-                        // TODO: Show price breakdown
-                      },
-                      child: const Text(
-                        'Breakdown >',
-                        style: TextStyle(
-                          color: Colors.orange,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
+                  // const SizedBox(height: 8),
+                  // Align(
+                  //   alignment: Alignment.centerRight,
+                  //   child: GestureDetector(
+                  //     onTap: () {
+                  //       ScaffoldMessenger.of(context).showSnackBar(
+                  //         const SnackBar(content: Text('Breakdown tapped!')),
+                  //       );
+                  //       // TODO: Show price breakdown
+                  //     },
+                  //     child: const Text(
+                  //       'Breakdown >',
+                  //       style: TextStyle(
+                  //         color: Colors.orange,
+                  //         fontSize: 14,
+                  //         fontWeight: FontWeight.w600,
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   const SizedBox(height: 32),
 
                   // Place Order Button

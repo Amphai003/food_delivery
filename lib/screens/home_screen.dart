@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:food_delivery/screens/all_food_item_screen.dart';
 import 'package:food_delivery/screens/all_restaurant_screen.dart';
 import 'package:food_delivery/screens/food_details_screen.dart';
+import 'package:food_delivery/screens/restaurant_detail_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:food_delivery/models/user_model.dart';
 import 'package:food_delivery/models/location_model.dart'; // Existing Location model
@@ -486,12 +487,13 @@ class _HomeScreenState extends State<HomeScreen> {
               Column(
                 children: currentRestaurantItems.map((restaurant) {
                   return _buildRestaurantCard(
-                    restaurant.name,
-                    restaurant.categories,
-                    restaurant.imageUrl,
-                    restaurant.rating.toString(),
-                    restaurant.deliveryFee,
-                    restaurant.deliveryTime,
+                    restaurant,
+                    // restaurant.name,
+                    // restaurant.categories,
+                    // restaurant.imageUrl,
+                    // restaurant.rating.toString(),
+                    // restaurant.deliveryFee,
+                    // restaurant.deliveryTime,
                   );
                 }).toList(),
               ),
@@ -534,83 +536,96 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildRestaurantCard(
-      String name, String categories, String imageUrl, String rating, String deliveryFee, String deliveryTime) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: Image.network(
-              imageUrl,
-              height: 150,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: 150,
-                  color: Colors.grey[200],
-                  child: const Center(
-                    child: Icon(Icons.broken_image, color: Colors.grey),
-                  ),
-                );
-              },
+      Restaurant restaurant) { // Change parameters to accept Restaurant object
+    return GestureDetector( // Wrap with GestureDetector
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RestaurantDetailScreen(
+              restaurant: restaurant,
+              availableFoodItems: _allFoodItems, // Pass all food items for now
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF2C2C3F),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  categories,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.star, color: Colors.orange, size: 16),
-                    const SizedBox(width: 4),
-                    Text(rating, style: TextStyle(color: Colors.grey[700])),
-                    const SizedBox(width: 16),
-                    Icon(Icons.delivery_dining, color: Colors.grey[600], size: 16),
-                    const SizedBox(width: 4),
-                    Text(deliveryFee, style: TextStyle(color: Colors.grey[700])),
-                    const SizedBox(width: 16),
-                    Icon(Icons.timer, color: Colors.grey[600], size: 16),
-                    const SizedBox(width: 4),
-                    Text(deliveryTime, style: TextStyle(color: Colors.grey[700])),
-                  ],
-                ),
-              ],
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              child: Image.network(
+                restaurant.imageUrl, // Use restaurant.imageUrl
+                height: 150,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 150,
+                    color: Colors.grey[200],
+                    child: const Center(
+                      child: Icon(Icons.broken_image, color: Colors.grey),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    restaurant.name, // Use restaurant.name
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2C2C3F),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    restaurant.categories, // Use restaurant.categories
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.star, color: Colors.orange, size: 16),
+                      const SizedBox(width: 4),
+                      Text(restaurant.rating.toString(), style: TextStyle(color: Colors.grey[700])), // Use restaurant.rating
+                      const SizedBox(width: 16),
+                      Icon(Icons.delivery_dining, color: Colors.grey[600], size: 16),
+                      const SizedBox(width: 4),
+                      Text(restaurant.deliveryFee, style: TextStyle(color: Colors.grey[700])), // Use restaurant.deliveryFee
+                      const SizedBox(width: 16),
+                      Icon(Icons.timer, color: Colors.grey[600], size: 16),
+                      const SizedBox(width: 4),
+                      Text(restaurant.deliveryTime, style: TextStyle(color: Colors.grey[700])), // Use restaurant.deliveryTime
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
